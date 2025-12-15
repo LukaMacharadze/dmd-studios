@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DMD Studios — Login</title>
+
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body>
+  <!-- subtle background -->
+  <div class="bg">
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+  </div>
+
+  <main class="wrap">
+    <a class="back" href="/">&larr; Back to Home</a>
+
+    <section class="card">
+      <div class="brand">
+        <div class="logo">DMD</div>
+        <div class="brand-text">
+          <h1>DMD Studios</h1>
+          <p>Sign in to manage your account</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" id="tabLogin" type="button">Login</button>
+        <button class="tab" id="tabSignup" type="button">Sign up</button>
+      </div>
+
+      <form class="form" id="authForm">
+        <label class="field">
+          <span>Login</span>
+          <input id="login" autocomplete="username" placeholder="e.g. jhon" />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <div class="pass">
+            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••••" />
+            <button class="eye" id="togglePass" type="button" aria-label="Show password">👁</button>
+          </div>
+        </label>
+
+        <button class="btn" id="submitBtn" type="submit">
+          Continue
+        </button>
+
+        <p class="hint" id="hintText">
+          Admin gets a Panel button on the main page menu.
+        </p>
+
+        <p class="msg" id="msg" role="status"></p>
+      </form>
+    </section>
+
+    <footer class="foot">
+      <span>© DMD Studios</span>
+    </footer>
+  </main>
+
+  <script>
+    let mode = "login"; // "login" | "signup"
+
+    const tabLogin = document.getElementById("tabLogin");
+    const tabSignup = document.getElementById("tabSignup");
+    const submitBtn = document.getElementById("submitBtn");
+    const msg = document.getElementById("msg");
+    const hintText = document.getElementById("hintText");
+
+    const loginEl = document.getElementById("login");
+    const passEl = document.getElementById("password");
+
+    function setMode(next) {
+      mode = next;
+
+      tabLogin.classList.toggle("active", mode === "login");
+      tabSignup.classList.toggle("active", mode === "signup");
+
+      submitBtn.textContent = mode === "login" ? "Login" : "Create account";
+      hintText.textContent = mode === "login"
+        ? "Enter your credentials to continue."
+        : "Create a user account — you will be logged in automatically.";
+
+      msg.textContent = "";
+      msg.className = "msg";
+    }
+
+    tabLogin.onclick = () => setMode("login");
+    tabSignup.onclick = () => setMode("signup");
+
+    // show/hide password
+    document.getElementById("togglePass").onclick = () => {
+      passEl.type = passEl.type === "password" ? "text" : "password";
+    };
+
+    document.getElementById("authForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "";
+      msg.className = "msg";
+
+      const login = loginEl.value.trim();
+      const password = passEl.value;
+
+      if (!login || !password) {
+        msg.textContent = "Please enter login and password.";
+        msg.classList.add("bad");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Please wait...";
+
+      try {
+        const url = mode === "login" ? "/api/login" : "/api/signup";
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ login, password })
+        });
+
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || "Request failed");
+
+        // успех → домой
+        msg.textContent = mode === "login" ? "Logged in successfully." : "Account created successfully.";
+        msg.classList.add("ok");
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 400);
+
+      } catch (err) {
+        msg.textContent = String(err.message || err);
+        msg.classList.add("bad");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = mode === "login" ? "Login" : "Create account";
+      }
+    });
+
+    // старт
+    setMode("login");
+  </script>
+</body>
+</html>

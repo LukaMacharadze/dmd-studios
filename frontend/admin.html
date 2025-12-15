@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Panel</title>
+
+  <style>
+    body { font-family: Arial; padding: 24px; }
+    .row { display: grid; gap: 8px; max-width: 520px; }
+    .card { border: 1px solid #ccc; padding: 10px; border-radius: 6px; }
+    .actions { margin-top: 8px; display: flex; gap: 8px; }
+    input, textarea { padding: 8px; }
+    button { padding: 8px 12px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Admin panel</h2>
+
+  <button id="logoutBtn">Logout</button>
+  <p id="who" style="margin-top:10px;"></p>
+
+  <h3>Add product</h3>
+  <div class="row">
+    <input id="title" placeholder="Title" />
+    <input id="price" type="number" placeholder="Price" />
+    <input id="image" placeholder="Image (example: images/p1.jpg)" />
+    <input id="category" placeholder="Category" />
+    <textarea id="description" placeholder="Description"></textarea>
+    <button id="addBtn">Add</button>
+    <p id="msg" style="color:red;"></p>
+  </div>
+
+  <h3 style="margin-top:24px;">Products</h3>
+  <div id="list" style="display:grid; gap:10px;"></div>
+
+  <script>
+    const msg = document.getElementById('msg');
+    const list = document.getElementById('list');
+    const who = document.getElementById('who');
+
+    async function getMe() {
+      const r = await fetch('/api/me', { credentials: 'include' });
+      const data = await r.json().catch(() => ({}));
+      return data.user || null;
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      location.href = '/';
+    }
+
+    // ✅ protect admin page (session-based)
+    (async () => {
+      const user = await getMe();
+
+      if (!user) {
+        location.href = '/login';
+        return;
+      }
+
+      if (user.role !== 'admin') {
+        location.href = '/';
+        return;
+      }
+
+      who.textContent = `Logged in as: ${user.login} (admin)`;
+    })();
+
+    document.getElementById('logoutBtn').onclick = logout;
+
+    async function api(url, options = {}) {
+      const r = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {}),
+        },
+        credentials: 'include'
+      });
+
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'API error');
+      return data;
+    }
+
+    async function load() {
+      const items = await fetch('/api/products').then(r => r.json());
+      list.innerHTML = '';
+
+      items.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `
+          <b>#${p.id}</b>
+          <div class="row" style="max-width:none;">
+            <input data-id="${p.id}" data-k="title" value="${p.title || ''}">
+            <input data-id="${p.id}" data-k="price" type="number" value="${p.price || 0}">
+            <input data-id="${p.id}" data-k="image" value="${p.image || ''}">
+            <input data-id="${p.id}" data-k="category" value="${p.category || ''}">
+            <textarea data-id="${p.id}" data-k="description" rows="2">${p.description || ''}</textarea>
+          </div>
+          <div class="actions">
+            <button data-save="${p.id}">Save</button>
+            <button data-del="${p.id}">Delete</button>
+          </div>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    document.getElementById('addBtn').onclick = async () => {
+      msg.textContent = '';
+      try {
+        await api('/api/products', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: document.getElementById('title').value.trim(),
+            price: Number(document.getElementById('price').value || 0),
+            image: document.getElementById('image').value.trim(),
+            category: document.getElementById('category').value.trim(),
+            description: document.getElementById('description').value.trim(),
+          })
+        });
+        await load();
+      } catch (e) {
+        msg.textContent = e.message;
+      }
+    };
+
+    list.addEventListener('click', async (e) => {
+      const saveId = e.target.getAttribute('data-save');
+      const delId = e.target.getAttribute('data-del');
+
+      try {
+        if (saveId) {
+          const fields = [...document.querySelectorAll(`[data-id="${saveId}"]`)];
+          const obj = {};
+          fields.forEach(x => obj[x.getAttribute('data-k')] = x.value);
+          obj.price = Number(obj.price || 0);
+
+          await api('/api/products/' + saveId, {
+            method: 'PUT',
+            body: JSON.stringify(obj)
+          });
+
+          await load();
+        }
+
+        if (delId) {
+          await api('/api/products/' + delId, { method: 'DELETE' });
+          await load();
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>

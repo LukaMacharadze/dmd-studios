@@ -1,0 +1,485 @@
+/* === GLOBAL === */
+:root {
+  --bg: #0b0b0b;
+  --text: #e9e7e6;
+  --muted: #a3a3a3;
+  --accent: #c8aa6e;
+  --card: #151515;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* === HEADER === */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: rgba(20, 20, 20, 0.85);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.logo-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-right: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-link:hover .logo-img {
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(200, 170, 110, 0.3);
+}
+
+.logo-text {
+  font-size: 1.3em;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+
+.nav {
+  display: flex;
+  gap: 35px;
+}
+
+.nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav a::after {
+  content: '';
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  left: 0;
+  bottom: -4px;
+  background-color: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+.nav a:hover {
+  color: var(--accent);
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 1.8em;
+  cursor: pointer;
+}
+
+/* === HERO === */
+.hero {
+  background-image: url("https://www.cabinetcorp.com/wp-content/uploads/2020/11/Image2-dark-kitchen-1-scaled.jpeg");
+  background-size: cover;
+  background-position: center;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  margin-top: 80px;
+  position: relative;
+  transition: transform 0.3s ease-out;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  animation: fadeIn 1s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  color: var(--muted);
+}
+
+.btn {
+  background-color: var(--accent);
+  color: #000;
+  border: none;
+  padding: 12px 25px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #d3b97c;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(200,170,110,0.4);
+}
+
+.btn.small {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+/* === PRODUCTS / IMAGE GRID === */
+.products {
+  padding: 100px 20px;
+  text-align: center;
+  background-color: var(--bg);
+}
+
+.products h2 {
+  font-size: 2rem;
+  margin-bottom: 40px;
+  color: var(--accent);
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.image-grid-item {
+  background-color: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease;
+  transform: translateY(40px);
+  opacity: 0;
+}
+
+.image-grid-item.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.image-grid-item:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.image-grid-item img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+}
+
+/* === LIGHTBOX WITH DETAILS === */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.lightbox.show {
+  display: flex;
+}
+
+.lightbox-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  max-width: 90%;
+  max-height: 90%;
+  gap: 30px;
+  animation: scaleIn 0.4s ease forwards;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.lightbox-content img {
+  max-width: 500px;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.lightbox-details {
+  flex: 1;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+  background: rgba(20,20,20,0.95);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  transform: translateX(50px);
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+.lightbox.show .lightbox-details {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.lightbox-details h3 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+.lightbox-details p {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.lightbox-details .item-price {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--accent);
+  margin: 10px 0;
+}
+
+.item-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.item-actions .btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d3b97c;
+}
+
+/* === FOOTER === */
+.footer {
+  background-color: #111;
+  text-align: center;
+  padding: 25px 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+
+
+
+
+
+
+
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #ddd;
+}
+
+.navbar a {
+  text-decoration: none;
+  margin-right: 16px;
+  color: black;
+}
+
+#user-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#user-area button {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+
+
+
+
+.user-menu {
+  position: relative;
+}
+
+.user-btn {
+  background: transparent;
+  border: none;
+  color: #d4af37;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 130%;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  min-width: 140px;
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background: #d4af37;
+  color: #000;
+}
+
+/* Panel link */
+.dropdown-link {
+  display: block;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: #fff;
+  font-size: 14px;
+}
+
+.dropdown-link:hover {
+  background: #d4af37;
+  color: #000;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .hero h1 { font-size: 2.4rem; }
+  .products { padding: 80px 20px; }
+}
+
+@media (max-width: 768px) {
+  .nav { display: none; flex-direction: column; position: absolute; top: 70px; right: 20px; background-color: #111; border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; }
+  .nav.show { display: flex; }
+  .menu-toggle { display: block; }
+  .hero h1 { font-size: 2rem; }
+  .logo-img { width: 44px; height: 44px; }
+  .logo-text { font-size: 1.1em; }
+  .lightbox-content { flex-direction: column; align-items: center; }
+  .lightbox-content img { max-width: 90%; }
+  .lightbox-details { text-align: center; transform: translateY(20px); }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 1.7rem; }
+  .products { padding: 60px 15px; }
+  .btn { font-size: 0.9rem; }
+}
