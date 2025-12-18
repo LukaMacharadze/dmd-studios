@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cart — DMD STUDIOS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <a href="/" class="logo-link">
+      <img src="images/d14cd461-4694-4135-85bc-ed1953f9a642.png" alt="DMD Studios Logo" class="logo-img" />
+      <span class="logo-text">DMD STUDIOS</span>
+    </a>
+
+    <nav class="nav" id="nav-menu">
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <div id="user-area"></div>
+    </nav>
+
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  </header>
+
+  <main class="page" style="padding-top: 24px;">
+    <section class="page-hero">
+      <h1>Your Cart</h1>
+      <p class="muted">Add products from Catalog or Popular Models.</p>
+    </section>
+
+    <section class="page-section">
+      <div class="glass-card">
+        <div id="cartEmpty" class="muted" style="display:none; padding: 10px 4px;">
+          Cart is empty. Go to <a href="/catalog" style="color: var(--accent);">Catalog</a>.
+        </div>
+
+        <div id="cartList" style="display:grid; gap:12px;"></div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div class="muted">Total:</div>
+          <div id="cartTotal" style="font-weight:900; color: var(--accent); font-size: 20px;">$0.00</div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top: 14px; flex-wrap:wrap;">
+          <button class="btn-outline" id="clearCart" type="button">Clear</button>
+          <button class="btn" id="goCheckout" type="button">Checkout</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="common.js"></script>
+  <script src="cart.js"></script>
+</body>
+</html>

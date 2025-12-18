@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact — DMD Studios</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <a href="/" class="logo-link">
+      <img src="images/d14cd461-4694-4135-85bc-ed1953f9a642.png" alt="DMD Studios Logo" class="logo-img" />
+      <span class="logo-text">DMD STUDIOS</span>
+    </a>
+
+    <nav class="nav" id="nav-menu">
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+
+      <div id="user-area"></div>
+    </nav>
+
+    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Menu">☰</button>
+  </header>
+
+  <!-- PAGE -->
+  <main class="page page-padding">
+    <section class="page-hero">
+      <div class="page-hero-inner">
+        <h1>Contact</h1>
+        <p class="muted">Questions, collaborations, custom orders — send a message.</p>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <div class="contact-grid">
+        <article class="glass-card">
+          <h2>Send us a message</h2>
+
+          <form id="contactForm" class="contact-form" autocomplete="off">
+            <label>
+              <span class="muted">Your name</span>
+              <input type="text" name="name" placeholder="John Doe" required />
+            </label>
+
+            <label>
+              <span class="muted">Email</span>
+              <input type="email" name="email" placeholder="you@email.com" required />
+            </label>
+
+            <label class="wide">
+              <span class="muted">Message</span>
+              <textarea name="message" rows="6" placeholder="Tell us what you need..." required></textarea>
+            </label>
+
+            <div class="contact-actions">
+              <button class="btn btn-primary" type="submit">Send</button>
+              <span class="muted small-note">Demo form — later we can connect real email sending.</span>
+            </div>
+          </form>
+        </article>
+
+        <aside class="glass-card">
+          <h2>Details</h2>
+
+          <div class="contact-info">
+            <div class="info-row">
+              <span class="info-key muted">Email</span>
+              <span class="info-val">demo@dmdstudios.com</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key muted">Phone</span>
+              <span class="info-val">+000 000 000</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key muted">Hours</span>
+              <span class="info-val">Mon–Sat • 10:00–19:00</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key muted">Location</span>
+              <span class="info-val">Tbilisi (demo)</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="mini-title">Quick notes</h3>
+          <p class="muted">
+            If you plan to launch real payments later — we’ll connect a provider (Stripe etc.) and keep your server clean & safe.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-line"></div>
+      <p class="muted">© 2025 DMD Studios — All rights reserved</p>
+    </footer>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <div class="toast-inner" id="toastInner">Saved</div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    const toast = document.getElementById('toast');
+    const toastInner = document.getElementById('toastInner');
+
+    function showToast(message, type = 'info') {
+      toast.className = 'toast show ' + type;
+      toastInner.textContent = message;
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.className = 'toast';
+      }, 1800);
+    }
+
+    document.getElementById('contactForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      showToast('Message sent (demo)', 'success');
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>

@@ -1,10 +1,45 @@
-// === BURGER MENU ===
 function toggleMenu() {
   const nav = document.getElementById("nav-menu");
   if (nav) nav.classList.toggle("show");
 }
 
-// === LIGHTBOX WITH DETAILS (safe) ===
+/* =========================================================
+   TOAST (NO ALERTS)
+   ========================================================= */
+let toastTimer = null;
+
+function ensureToast() {
+  let t = document.getElementById("toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "toast";
+    t.className = "toast";
+    t.innerHTML = `<div class="toast-inner" id="toastInner">...</div>`;
+    document.body.appendChild(t);
+  }
+  return t;
+}
+
+function showToast(message, type = "info") {
+  const t = ensureToast();
+  const inner = document.getElementById("toastInner");
+
+  t.classList.remove("success", "error", "info");
+  t.classList.add(type);
+
+  if (inner) inner.textContent = message;
+
+  t.classList.add("show");
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.classList.remove("show");
+  }, 1800);
+}
+
+/* =========================================================
+   LIGHTBOX (MAIN PAGE) — твой старый (image-grid-item)
+   ========================================================= */
 const lightbox = document.getElementById("lightbox");
 const items = document.querySelectorAll(".image-grid-item img");
 
@@ -43,47 +78,216 @@ const furnitureData = [
   },
 ];
 
-if (items && items.length && lightbox) {
-  items.forEach((item) => {
-    item.addEventListener("click", () => {
-      const data = furnitureData.find((f) => f.src === item.src);
-      if (!data) return;
+function closeAnyLightbox() {
+  const lb = document.getElementById("lightbox");
+  if (!lb) return;
+  lb.classList.remove("show");
+  lb.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "auto";
+}
 
-      const img = lightbox.querySelector(".lightbox-content img");
-      if (img) img.src = data.src;
+function openAnyLightbox() {
+  const lb = document.getElementById("lightbox");
+  if (!lb) return;
+  lb.classList.add("show");
+  lb.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
 
-      const t = lightbox.querySelector(".item-title");
-      const d = lightbox.querySelector(".item-description");
-      const dim = lightbox.querySelector(".item-dimensions");
-      const mat = lightbox.querySelector(".item-materials");
-      const p = lightbox.querySelector(".item-price");
+function setupMainLightboxIfExists() {
+  if (!lightbox) return;
 
-      if (t) t.textContent = data.title;
-      if (d) d.textContent = data.description;
-      if (dim) dim.textContent = `Dimensions: ${data.dimensions}`;
-      if (mat) mat.textContent = `Materials: ${data.materials}`;
-      if (p) p.textContent = data.price;
+  // main.html uses .item-title etc
+  const hasMainMarkup = !!lightbox.querySelector(".item-title");
+  if (!hasMainMarkup) return;
 
-      lightbox.classList.add("show");
-      document.body.style.overflow = "hidden";
+  if (items && items.length) {
+    items.forEach((item) => {
+      item.addEventListener("click", () => {
+        const data = furnitureData.find((f) => f.src === item.src);
+        if (!data) return;
+
+        const img = lightbox.querySelector(".lightbox-content img");
+        if (img) img.src = data.src;
+
+        const t = lightbox.querySelector(".item-title");
+        const d = lightbox.querySelector(".item-description");
+        const dim = lightbox.querySelector(".item-dimensions");
+        const mat = lightbox.querySelector(".item-materials");
+        const p = lightbox.querySelector(".item-price");
+
+        if (t) t.textContent = data.title;
+        if (d) d.textContent = data.description;
+        if (dim) dim.textContent = `Dimensions: ${data.dimensions}`;
+        if (mat) mat.textContent = `Materials: ${data.materials}`;
+        if (p) p.textContent = data.price;
+
+        openAnyLightbox();
+      });
     });
-  });
+  }
 
   lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox) {
-      lightbox.classList.remove("show");
-      document.body.style.overflow = "auto";
-    }
+    if (e.target === lightbox) closeAnyLightbox();
   });
 }
 
-// === SCROLL ANIMATION & SUBTLE PARALLAX (safe) ===
+/* =========================================================
+   CATALOG LIGHTBOX (catalog.html) — new modal fields
+   ========================================================= */
+const lbClose = document.getElementById("modalClose") || document.getElementById("lbClose");
+const lbImg = document.getElementById("modalImg") || document.getElementById("lbImg");
+const lbTitle = document.getElementById("modalTitle") || document.getElementById("lbTitle");
+const lbDesc = document.getElementById("modalDesc") || document.getElementById("lbDesc");
+const lbMetaCategory = document.getElementById("modalCategory") || document.getElementById("lbMeta");
+const lbMetaPrice = document.getElementById("modalPrice") || document.getElementById("lbPrice");
+const lbAdd = document.getElementById("modalAdd") || document.getElementById("lbAdd");
+const lbBuy = document.getElementById("modalBuy") || document.getElementById("lbBuy");
+
+function hasCatalogLightboxMarkup() {
+  // catalog.html uses modal ids, but we support both old/new ids above
+  return !!(lightbox && lbImg && lbTitle && lbDesc && (lbMetaPrice || lbMetaCategory));
+}
+
+function openCatalogLightbox(p) {
+  if (!hasCatalogLightboxMarkup()) return;
+
+  const img = (p.image || "").trim();
+  lbImg.src = img;
+  lbTitle.textContent = p.title || "";
+  lbDesc.textContent = p.description || "";
+
+  // different markup variants:
+  if (lbMetaCategory && lbMetaCategory.id === "modalCategory") {
+    lbMetaCategory.textContent = p.category || "";
+  } else if (lbMetaCategory) {
+    lbMetaCategory.textContent = (p.category || "").trim();
+  }
+
+  const priceText = `$${Number(p.price || 0).toFixed(2)}`;
+  if (lbMetaPrice && lbMetaPrice.id === "modalPrice") {
+    lbMetaPrice.textContent = priceText;
+  } else if (lbMetaPrice) {
+    lbMetaPrice.textContent = priceText;
+  }
+
+  if (lbAdd) {
+    lbAdd.onclick = () => showToast("Added to cart (demo)", "success");
+  }
+  if (lbBuy) {
+    lbBuy.onclick = () => showToast("Checkout (demo)", "info");
+  }
+
+  openAnyLightbox();
+}
+
+/* =========================================================
+   RENDER PRODUCTS CARDS (used by CATALOG + MAIN)
+   ========================================================= */
+function productCardHTML(p) {
+  const img = (p.image || "").trim();
+  const price = `$${Number(p.price || 0).toFixed(2)}`;
+
+  return `
+    <article class="product-card">
+      <img class="product-img" src="${img}" alt="${p.title || "Product"}"
+        onerror="this.style.opacity=.25; this.alt='Image not found';" />
+      <div class="product-body">
+        <div class="product-row">
+          <div>
+            <div class="product-title">${p.title || ""}</div>
+            <div class="product-cat">${p.category || ""}</div>
+          </div>
+          <div class="price">${price}</div>
+        </div>
+        <div class="product-desc">${p.description || ""}</div>
+        <div class="product-actions">
+          <button class="btn-outline" data-view="${p.id}" type="button">View</button>
+          <button class="btn" data-add="${p.id}" type="button">Add</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+async function fetchProducts() {
+  const r = await fetch("/api/products", { credentials: "include" });
+  return await r.json();
+}
+
+/* =========================================================
+   CATALOG PAGE: render ALL
+   ========================================================= */
+async function loadCatalogPage() {
+  const grid = document.getElementById("catalogGrid");
+  if (!grid) return;
+
+  const products = await fetchProducts();
+
+  if (!products.length) {
+    grid.innerHTML = `<div class="empty">No products yet.</div>`;
+    return;
+  }
+
+  grid.innerHTML = products.map(productCardHTML).join("");
+
+  // delegation
+  grid.onclick = (e) => {
+    const viewId = e.target?.getAttribute?.("data-view");
+    const addId = e.target?.getAttribute?.("data-add");
+
+    if (viewId) {
+      const p = products.find((x) => String(x.id) === String(viewId));
+      if (p) openCatalogLightbox(p);
+    }
+    if (addId) {
+      showToast("Added to cart (demo)", "success");
+    }
+  };
+}
+
+/* =========================================================
+   MAIN PAGE: render LAST 5
+   ========================================================= */
+async function loadMainProducts() {
+  const grid = document.getElementById("mainProducts");
+  if (!grid) return;
+
+  const products = await fetchProducts();
+
+  // ✅ показываем 5 последних
+  const top = products.slice(0, 5);
+
+  if (!top.length) {
+    grid.innerHTML = `<div class="empty">No products yet.</div>`;
+    return;
+  }
+
+  grid.innerHTML = top.map(productCardHTML).join("");
+
+  // delegation
+  grid.onclick = (e) => {
+    const viewId = e.target?.getAttribute?.("data-view");
+    const addId = e.target?.getAttribute?.("data-add");
+
+    if (viewId) {
+      const p = products.find((x) => String(x.id) === String(viewId));
+      if (p) openCatalogLightbox(p); // можно тем же модалом
+    }
+    if (addId) {
+      showToast("Added to cart (demo)", "success");
+    }
+  };
+}
+
+/* =========================================================
+   SCROLL ANIMATION & PARALLAX (safe)
+   ========================================================= */
 const gridItems = document.querySelectorAll(".image-grid-item");
 const hero = document.querySelector(".hero");
 
 function onScroll() {
   const scrollY = window.scrollY;
-
   if (hero) hero.style.transform = `translateY(${scrollY * 0.1}px)`;
 
   const triggerBottom = window.innerHeight - 100;
@@ -99,10 +303,11 @@ function onScroll() {
 window.addEventListener("scroll", onScroll);
 window.addEventListener("load", onScroll);
 
-// === USER DROPDOWN (API /api/me) ===
+/* =========================================================
+   USER DROPDOWN (API /api/me)
+   ========================================================= */
 document.addEventListener("DOMContentLoaded", async () => {
   const userArea = document.getElementById("user-area");
-  if (!userArea) return;
 
   async function getMe() {
     try {
@@ -121,37 +326,61 @@ document.addEventListener("DOMContentLoaded", async () => {
     location.href = "/";
   }
 
-  const user = await getMe();
+  if (userArea) {
+    const user = await getMe();
 
-  if (!user) {
-    userArea.innerHTML = `<a href="/login">Login</a>`;
-    return;
+    if (!user) {
+      userArea.innerHTML = `<a href="/login">Login</a>`;
+    } else {
+      const name = user.login || "User";
+      const isAdmin = user.role === "admin";
+
+      userArea.innerHTML = `
+        <div class="user-menu">
+          <button class="user-btn" id="userBtn" type="button">${name}</button>
+          <div class="dropdown" id="userDropdown" style="display:none;">
+            ${isAdmin ? `<a class="dropdown-link" href="/admin">Panel</a>` : ``}
+            <button class="dropdown-item" id="logoutBtn" type="button">Logout</button>
+          </div>
+        </div>
+      `;
+
+      const userBtn = document.getElementById("userBtn");
+      const dropdown = document.getElementById("userDropdown");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      userBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".user-menu")) dropdown.style.display = "none";
+      });
+
+      logoutBtn.addEventListener("click", logout);
+    }
   }
 
-  const name = user.login || "User";
-  const isAdmin = user.role === "admin";
+  // bind catalog modal close + background close + ESC
+  if (hasCatalogLightboxMarkup()) {
+    if (lbClose) lbClose.addEventListener("click", closeAnyLightbox);
 
-  userArea.innerHTML = `
-    <div class="user-menu">
-      <button class="user-btn" id="userBtn">${name}</button>
-      <div class="dropdown" id="userDropdown" style="display:none;">
-        ${isAdmin ? `<a class="dropdown-link" href="/admin">Panel</a>` : ``}
-        <button class="dropdown-item" id="logoutBtn">Logout</button>
-      </div>
-    </div>
-  `;
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeAnyLightbox();
+    });
 
-  const userBtn = document.getElementById("userBtn");
-  const dropdown = document.getElementById("userDropdown");
-  const logoutBtn = document.getElementById("logoutBtn");
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && lightbox?.classList.contains("show")) {
+        closeAnyLightbox();
+      }
+    });
+  }
 
-  userBtn.addEventListener("click", () => {
-    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
-  });
+  // init main lightbox (old)
+  setupMainLightboxIfExists();
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".user-menu")) dropdown.style.display = "none";
-  });
-
-  logoutBtn.addEventListener("click", logout);
+  // init DB cards
+  await loadCatalogPage();
+  await loadMainProducts();
 });

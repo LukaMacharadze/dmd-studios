@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checkout — DMD STUDIOS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <a href="/" class="logo-link">
+      <img src="images/d14cd461-4694-4135-85bc-ed1953f9a642.png" alt="DMD Studios Logo" class="logo-img" />
+      <span class="logo-text">DMD STUDIOS</span>
+    </a>
+
+    <nav class="nav" id="nav-menu">
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <div id="user-area"></div>
+    </nav>
+
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  </header>
+
+  <main class="page" style="padding-top: 24px;">
+    <section class="page-hero">
+      <h1>Checkout</h1>
+      <p class="muted">no real payments yet 😊</p>
+    </section>
+
+    <section class="page-section">
+      <div class="glass-card" style="display:grid; grid-template-columns: 1.2fr .8fr; gap:16px;">
+        <!-- LEFT: form -->
+        <div>
+          <h3 class="mini-title">Delivery details</h3>
+          <div class="divider"></div>
+
+          <form id="checkoutForm" class="contact-form">
+            <label>
+              Full name
+              <input id="fullName" placeholder="John Doe" required />
+            </label>
+
+            <label>
+              Phone
+              <input id="phone" placeholder="+995 ..." required />
+            </label>
+
+            <label class="wide">
+              Address
+              <input id="address" placeholder="City, street, house..." required />
+            </label>
+
+            <label class="wide">
+              Comment (optional)
+              <textarea id="comment" rows="4" placeholder="Floor, entrance, delivery time..."></textarea>
+            </label>
+
+            <div class="contact-actions">
+              <button class="btn" type="submit">Place order</button>
+              <a class="btn-outline" href="/cart" style="text-decoration:none;">Back to cart</a>
+              
+            </div>
+          </form>
+        </div>
+
+        <!-- RIGHT: summary -->
+        <div>
+          <h3 class="mini-title">Order summary</h3>
+          <div class="divider"></div>
+
+          <div id="summaryList" style="display:grid; gap:10px;"></div>
+
+          <div class="divider"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="muted">Total:</div>
+            <div id="summaryTotal" style="font-weight:900; color: var(--accent); font-size: 20px;">$0.00</div>
+          </div>
+
+          
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="common.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>

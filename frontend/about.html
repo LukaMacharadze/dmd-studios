@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About — DMD Studios</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <a href="/" class="logo-link">
+      <img src="images/d14cd461-4694-4135-85bc-ed1953f9a642.png" alt="DMD Studios Logo" class="logo-img" />
+      <span class="logo-text">DMD STUDIOS</span>
+    </a>
+
+    <nav class="nav" id="nav-menu">
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+
+      <div id="user-area"></div>
+    </nav>
+
+    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Menu">☰</button>
+  </header>
+
+  <!-- PAGE -->
+  <main class="page page-padding">
+    <section class="page-hero">
+      <div class="page-hero-inner">
+        <h1>About DMD Studios</h1>
+        <p class="muted">
+          Premium furniture for modern interiors — crafted with care, built to last, and designed to feel timeless.
+        </p>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <div class="about-grid">
+        <article class="glass-card">
+          <h2>Our Mission</h2>
+          <p class="muted">
+            We create furniture that looks expensive, feels comfortable, and stays beautiful for years.
+            Clean lines, quality materials, and attention to detail — that’s the whole vibe.
+          </p>
+          <div class="divider"></div>
+          <ul class="checklist">
+            <li>Modern minimal design</li>
+            <li>Reliable materials & finishes</li>
+            <li>Comfort-first ergonomics</li>
+            <li>Smart pricing (no “brand tax”)</li>
+          </ul>
+        </article>
+
+        <article class="glass-card">
+          <h2>How We Work</h2>
+          <p class="muted">
+            From idea → sketch → prototype → final piece. We test proportions, textures, and durability.
+          </p>
+          <div class="divider"></div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">01</div>
+              <div class="step-body">
+                <div class="step-title">Design</div>
+                <div class="step-text muted">We start with a clean shape and real-world comfort.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">02</div>
+              <div class="step-body">
+                <div class="step-title">Materials</div>
+                <div class="step-text muted">Wood, metal, fabric — selected for strength and look.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">03</div>
+              <div class="step-body">
+                <div class="step-title">Build</div>
+                <div class="step-text muted">Solid construction + neat finishing.</div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass-card wide">
+          <h2>FAQ</h2>
+          <div class="faq">
+            <details>
+              <summary>Do you deliver internationally?</summary>
+              <p class="muted">For now it’s a demo project, but the structure is ready to extend to real delivery logic.</p>
+            </details>
+            <details>
+              <summary>Can I customize materials and color?</summary>
+              <p class="muted">Yes — conceptually. Later we can add options in admin panel and show variants in catalog.</p>
+            </details>
+            <details>
+              <summary>Is this a real store?</summary>
+              <p class="muted">Right now: portfolio/demo with database + admin panel. Later: can be upgraded to real payments.</p>
+            </details>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-line"></div>
+      <p class="muted">© 2025 DMD Studios — All rights reserved</p>
+    </footer>
+  </main>
+
+  <script src="common.js"></script>
+</body>
+</html>

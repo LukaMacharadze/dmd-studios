@@ -1,24 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DMD STUDIOS — Premium Furniture</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- HEADER -->
+
+  <!-- HEADER / NAVBAR -->
   <header class="header">
-    <a href="main.html" class="logo-link">
+    <a href="/" class="logo-link">
+      
       <img src="images/d14cd461-4694-4135-85bc-ed1953f9a642.png" alt="DMD Studios Logo" class="logo-img" />
       <span class="logo-text">DMD STUDIOS</span>
     </a>
 
     <nav class="nav" id="nav-menu">
-      <a href="main.html">Home</a>
-      <a href="#">Catalog</a>
-      <a href="#">About</a>
-      <a href="#">Contact</a>
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+
       
       <div id="user-area"></div>
     </nav>
@@ -31,68 +34,57 @@
     <div class="hero-content">
       <h1>Elegant Furniture for Modern Living</h1>
       <p>Contemporary design. Exceptional quality. Crafted to perfection.</p>
-      <button class="btn">View Catalog</button>
+      <button class="btn" onclick="location.href='/catalog'">View Catalog</button>
     </div>
   </section>
 
-  <!-- PRODUCTS / IMAGE GRID -->
-  <section class="products">
+  <!-- MAIN PRODUCTS FROM DB -->
+  <section class="products" id="about">
     <h2>Popular Models</h2>
-    <div class="image-grid">
-      <div class="image-grid-item">
-        <img src="https://images.squarespace-cdn.com/content/v1/63dde481bbabc6724d988548/12b13683-b8d6-45cf-9584-fda56589d9f9/_436977a2-39a5-408b-a99d-842c3fd42c79.jpeg" alt="Graphite Sofa" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://s3.amazonaws.com/ideas-after/fe24d9fe-2dbd-4b40-93ed-8eceec10cfc2.jpeg" alt="Oak Dining Set" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1000&q=80" alt="Noir Armchair" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://img.freepik.com/premium-photo/timeless-design-dark-wood-wardrobe-generative-ai_724548-15164.jpg" alt="Eclipse Bed" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://img.freepik.com/premium-photo/timeless-design-dark-wood-wardrobe-generative-ai_724548-15164.jpg" alt="Eclipse Bed" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://img.freepik.com/premium-photo/timeless-design-dark-wood-wardrobe-generative-ai_724548-15164.jpg" alt="Eclipse Bed" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://img.freepik.com/premium-photo/timeless-design-dark-wood-wardrobe-generative-ai_724548-15164.jpg" alt="Eclipse Bed" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://img.freepik.com/premium-photo/timeless-design-dark-wood-wardrobe-generative-ai_724548-15164.jpg" alt="Eclipse Bed" />
-      </div>
-      <div class="image-grid-item">
-        <img src="https://img.freepik.com/premium-photo/timeless-design-dark-wood-wardrobe-generative-ai_724548-15164.jpg" alt="Eclipse Bed" />
-      </div>
-    </div>
+    
+
+    <div class="catalog-grid" id="mainProducts"></div>
   </section>
 
-  <!-- LIGHTBOX -->
-  <div class="lightbox" id="lightbox">
-    <div class="lightbox-content">
-      <img src="" alt="Furniture Image" />
-      <div class="lightbox-details">
-        <h3 class="item-title"></h3>
-        <p class="item-description"></p>
-        <p class="item-dimensions"></p>
-        <p class="item-materials"></p>
-        <span class="item-price"></span>
-        <div class="item-actions">
-          <button class="btn add-cart">Add to Cart</button>
-          <button class="btn buy-now">Buy</button>
+  <!-- CONTACT -->
+  <section class="products footer" id="contact">
+
+    <h2>Contact</h2>
+    <p class="muted">Email: demo@dmdstudios.com • Phone: +000 000 000</p>
+  </section>
+
+  <!-- MODAL (same as catalog) -->
+  <div class="modal" id="productModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalClose" type="button">✕</button>
+
+      <div class="modal-body">
+        <div class="modal-media">
+          <img id="modalImg" alt="" />
+        </div>
+
+        <div class="modal-info">
+          <h2 id="modalTitle"></h2>
+
+          <div class="modal-meta">
+            <div><span class="muted">Category:</span> <span id="modalCategory"></span></div>
+            <div><span class="muted">Price:</span> <span id="modalPrice"></span></div>
+          </div>
+
+          <p class="modal-desc" id="modalDesc"></p>
+
+          <div class="modal-actions">
+            <button class="btn" id="modalAdd" type="button">Add to Cart</button>
+            <button class="btn-outline" id="modalBuy" type="button">Buy</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <p>© 2025 DMD STUDIOS | All rights reserved</p>
-  </footer>
-
-  <!-- SCRIPT -->
-  <script src="script.js"></script>
+  <!-- SCRIPTS (order matters) -->
+  
+  <script src="common.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>

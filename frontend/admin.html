@@ -4,159 +4,460 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Panel</title>
-
-  <style>
-    body { font-family: Arial; padding: 24px; }
-    .row { display: grid; gap: 8px; max-width: 520px; }
-    .card { border: 1px solid #ccc; padding: 10px; border-radius: 6px; }
-    .actions { margin-top: 8px; display: flex; gap: 8px; }
-    input, textarea { padding: 8px; }
-    button { padding: 8px 12px; cursor: pointer; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <h2>Admin panel</h2>
+  <!-- HEADER / NAVBAR -->
+  <header class="header">
+    <a href="/" class="logo-link">
+      <img src="images/d14cd461-4694-4135-85bc-ed1953f9a642.png" alt="DMD Studios Logo" class="logo-img" />
+      <span class="logo-text">DMD STUDIOS</span>
+    </a>
 
-  <button id="logoutBtn">Logout</button>
-  <p id="who" style="margin-top:10px;"></p>
+    <nav class="nav" id="nav-menu">
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <div id="user-area"></div>
+    </nav>
 
-  <h3>Add product</h3>
-  <div class="row">
-    <input id="title" placeholder="Title" />
-    <input id="price" type="number" placeholder="Price" />
-    <input id="image" placeholder="Image (example: images/p1.jpg)" />
-    <input id="category" placeholder="Category" />
-    <textarea id="description" placeholder="Description"></textarea>
-    <button id="addBtn">Add</button>
-    <p id="msg" style="color:red;"></p>
-  </div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  </header>
 
-  <h3 style="margin-top:24px;">Products</h3>
-  <div id="list" style="display:grid; gap:10px;"></div>
+  <main class="admin-page">
+    <section class="admin-card">
+      <div class="admin-head">
+        <h2>Admin panel</h2>
+        <div class="admin-actions">
+          <span id="who" class="admin-who"></span>
+          <button class="btn" id="logout" type="button">Logout</button>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <!-- LEFT: ADD PRODUCT + ORDERS -->
+        <div class="admin-box">
+          <h3>Add product</h3>
+
+          <div class="admin-form">
+            <input id="title" placeholder="Title" />
+            <input id="price" type="number" placeholder="Price" />
+
+            <input id="image" placeholder="Image URL or path (example: images/p1.jpg)" />
+            <input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp" />
+
+            <img
+              id="imagePreview"
+              alt="preview"
+              style="display:none;margin-top:10px;width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,0.12);"
+            />
+
+            <p class="muted" style="margin-top:8px;font-size:12px;opacity:.75;">
+              Tip: if you upload a file, it will override Image URL.
+            </p>
+
+            <input id="category" placeholder="Category" />
+            <textarea id="description" placeholder="Description" rows="4"></textarea>
+
+            <div class="admin-form-actions">
+              <button class="btn btn-primary" id="add" type="button">Add</button>
+              <p id="msg" class="admin-msg"></p>
+            </div>
+          </div>
+
+          <!-- ORDERS (moved here, not inside button block) -->
+          <div class="admin-box" style="margin-top:14px;">
+            <h3>Orders</h3>
+            <div id="orders"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: PRODUCTS LIST -->
+        <div class="admin-box">
+          <h3>Products</h3>
+          <div id="list" class="admin-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <script>
-    const msg = document.getElementById('msg');
-    const list = document.getElementById('list');
-    const who = document.getElementById('who');
+    // ===== Burger menu =====
+    function toggleMenu() {
+      const nav = document.getElementById("nav-menu");
+      if (nav) nav.classList.toggle("show");
+    }
+
+    // ===== User dropdown =====
+    const userArea = document.getElementById("user-area");
 
     async function getMe() {
-      const r = await fetch('/api/me', { credentials: 'include' });
-      const data = await r.json().catch(() => ({}));
-      return data.user || null;
+      const r = await fetch("/api/me", { credentials: "include" });
+      const data = await r.json();
+      return data.user;
     }
 
-    async function logout() {
-      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-      location.href = '/';
+    async function logoutEverywhere() {
+      await fetch("/api/logout", { method: "POST", credentials: "include" });
+      location.href = "/";
     }
 
-    // ✅ protect admin page (session-based)
     (async () => {
-      const user = await getMe();
+      const user = await getMe().catch(() => null);
 
       if (!user) {
-        location.href = '/login';
-        return;
-      }
+        userArea.innerHTML = `<a href="/login">Login</a>`;
+      } else {
+        userArea.innerHTML = `
+          <div class="user-menu">
+            <button class="user-btn" id="userBtn" type="button">${user.login}</button>
+            <div class="dropdown" id="userDropdown" style="display:none;">
+              ${user.role === "admin" ? `<a class="dropdown-link" href="/admin">Panel</a>` : ``}
+              <button class="dropdown-item" id="logoutBtn" type="button">Logout</button>
+            </div>
+          </div>
+        `;
 
-      if (user.role !== 'admin') {
-        location.href = '/';
-        return;
-      }
+        const userBtn = document.getElementById("userBtn");
+        const dropdown = document.getElementById("userDropdown");
+        const logoutBtn = document.getElementById("logoutBtn");
 
-      who.textContent = `Logged in as: ${user.login} (admin)`;
+        userBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".user-menu")) dropdown.style.display = "none";
+        });
+
+        logoutBtn.addEventListener("click", logoutEverywhere);
+      }
     })();
 
-    document.getElementById('logoutBtn').onclick = logout;
+    // ===== Admin page logic =====
+    const msg = document.getElementById("msg");
+    const list = document.getElementById("list");
+    const who = document.getElementById("who");
+    const ordersBox = document.getElementById("orders");
+
+    document.getElementById("logout").onclick = logoutEverywhere;
+
+    function toast(text, type = "ok") {
+      msg.textContent = text;
+      msg.classList.remove("ok", "err");
+      msg.classList.add(type === "ok" ? "ok" : "err");
+      setTimeout(() => { msg.textContent = ""; }, 1800);
+    }
+
+    async function mustBeAdmin() {
+      const me = await getMe();
+      if (!me) location.href = "/login";
+      if (me.role !== "admin") location.href = "/";
+      who.textContent = `Logged in as: ${me.login} (${me.role})`;
+      return me;
+    }
 
     async function api(url, options = {}) {
       const r = await fetch(url, {
         ...options,
+        credentials: "include",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...(options.headers || {}),
         },
-        credentials: 'include'
       });
-
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || 'API error');
+      if (!r.ok) throw new Error(data.error || "API error");
       return data;
     }
 
-    async function load() {
-      const items = await fetch('/api/products').then(r => r.json());
-      list.innerHTML = '';
+    // ===== Upload helpers =====
+    async function uploadFile(file) {
+      const fd = new FormData();
+      fd.append("image", file);
 
-      items.forEach(p => {
-        const el = document.createElement('div');
-        el.className = 'card';
+      const r = await fetch("/api/upload", {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      });
+
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "upload failed");
+      return data.path; // e.g. "uploads/p_123.jpg"
+    }
+
+    // ===== Add form preview =====
+    const imageFile = document.getElementById("imageFile");
+    const imagePreview = document.getElementById("imagePreview");
+
+    if (imageFile && imagePreview) {
+      imageFile.addEventListener("change", () => {
+        const f = imageFile.files?.[0];
+        if (!f) {
+          imagePreview.style.display = "none";
+          imagePreview.src = "";
+          return;
+        }
+        imagePreview.src = URL.createObjectURL(f);
+        imagePreview.style.display = "block";
+      });
+    }
+
+    async function uploadSelectedImage() {
+      const f = imageFile?.files?.[0];
+      if (!f) return null;
+      return await uploadFile(f);
+    }
+
+    // ===== Render products list =====
+    function esc(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function load() {
+      const items = await fetch("/api/products", { credentials: "include" }).then((r) => r.json());
+      list.innerHTML = "";
+
+      items.forEach((p) => {
+        const el = document.createElement("div");
+        el.className = "product-row";
+
         el.innerHTML = `
-          <b>#${p.id}</b>
-          <div class="row" style="max-width:none;">
-            <input data-id="${p.id}" data-k="title" value="${p.title || ''}">
-            <input data-id="${p.id}" data-k="price" type="number" value="${p.price || 0}">
-            <input data-id="${p.id}" data-k="image" value="${p.image || ''}">
-            <input data-id="${p.id}" data-k="category" value="${p.category || ''}">
-            <textarea data-id="${p.id}" data-k="description" rows="2">${p.description || ''}</textarea>
+          <div class="product-row-head">
+            <b>#${p.id}</b>
+            <div class="product-row-actions">
+              <button class="btn btn-small" data-save="${p.id}" type="button">Save</button>
+              <button class="btn btn-small btn-danger" data-del="${p.id}" type="button">Delete</button>
+            </div>
           </div>
-          <div class="actions">
-            <button data-save="${p.id}">Save</button>
-            <button data-del="${p.id}">Delete</button>
+
+          <div class="product-row-grid">
+            <label>Title
+              <input data-id="${p.id}" data-k="title" value="${esc(p.title)}">
+            </label>
+
+            <label>Price
+              <input data-id="${p.id}" data-k="price" type="number" value="${Number(p.price || 0)}">
+            </label>
+
+            <label>Image
+              <input data-id="${p.id}" data-k="image" value="${esc(p.image)}">
+              <div style="display:flex; gap:10px; margin-top:8px; align-items:center; flex-wrap:wrap;">
+                <input id="file-${p.id}" type="file" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+                <button class="btn btn-small" data-up="${p.id}" type="button">Upload image</button>
+                <span class="muted" style="font-size:12px;opacity:.7;">(uploads to /uploads and auto-saves)</span>
+              </div>
+            </label>
+
+            <label>Category
+              <input data-id="${p.id}" data-k="category" value="${esc(p.category)}">
+            </label>
+
+            <label class="wide">Description
+              <textarea data-id="${p.id}" data-k="description" rows="3">${esc(p.description)}</textarea>
+            </label>
           </div>
         `;
+
         list.appendChild(el);
       });
     }
 
-    document.getElementById('addBtn').onclick = async () => {
-      msg.textContent = '';
+    function collectRowObject(id) {
+      const fields = [...document.querySelectorAll(`[data-id="${id}"]`)];
+      const obj = {};
+      fields.forEach((x) => (obj[x.getAttribute("data-k")] = x.value));
+      obj.price = Number(obj.price || 0);
+      return obj;
+    }
+
+    async function saveRow(id) {
+      const obj = collectRowObject(id);
+      await api("/api/products/" + id, { method: "PUT", body: JSON.stringify(obj) });
+    }
+
+    // ===== ADD PRODUCT =====
+    document.getElementById("add").onclick = async () => {
       try {
-        await api('/api/products', {
-          method: 'POST',
+        let imagePath = document.getElementById("image").value.trim();
+
+        const uploaded = await uploadSelectedImage();
+        if (uploaded) imagePath = uploaded;
+
+        await api("/api/products", {
+          method: "POST",
           body: JSON.stringify({
-            title: document.getElementById('title').value.trim(),
-            price: Number(document.getElementById('price').value || 0),
-            image: document.getElementById('image').value.trim(),
-            category: document.getElementById('category').value.trim(),
-            description: document.getElementById('description').value.trim(),
-          })
+            title: document.getElementById("title").value.trim(),
+            price: Number(document.getElementById("price").value || 0),
+            image: imagePath,
+            category: document.getElementById("category").value.trim(),
+            description: document.getElementById("description").value.trim(),
+          }),
         });
+
+        document.getElementById("title").value = "";
+        document.getElementById("price").value = "";
+        document.getElementById("image").value = "";
+        document.getElementById("category").value = "";
+        document.getElementById("description").value = "";
+
+        if (imageFile) imageFile.value = "";
+        if (imagePreview) {
+          imagePreview.style.display = "none";
+          imagePreview.src = "";
+        }
+
+        toast("Product added ✅", "ok");
         await load();
       } catch (e) {
-        msg.textContent = e.message;
+        toast(e.message, "err");
       }
     };
 
-    list.addEventListener('click', async (e) => {
-      const saveId = e.target.getAttribute('data-save');
-      const delId = e.target.getAttribute('data-del');
+    // ===== SAVE / DELETE / UPLOAD PER ROW =====
+    list.addEventListener("click", async (e) => {
+      const saveId = e.target.getAttribute("data-save");
+      const delId = e.target.getAttribute("data-del");
+      const upId = e.target.getAttribute("data-up");
 
       try {
         if (saveId) {
-          const fields = [...document.querySelectorAll(`[data-id="${saveId}"]`)];
-          const obj = {};
-          fields.forEach(x => obj[x.getAttribute('data-k')] = x.value);
-          obj.price = Number(obj.price || 0);
-
-          await api('/api/products/' + saveId, {
-            method: 'PUT',
-            body: JSON.stringify(obj)
-          });
-
+          await saveRow(saveId);
+          toast("Saved ✅", "ok");
           await load();
+          return;
         }
 
         if (delId) {
-          await api('/api/products/' + delId, { method: 'DELETE' });
+          await api("/api/products/" + delId, { method: "DELETE" });
+          toast("Deleted 🗑️", "ok");
           await load();
+          return;
+        }
+
+        if (upId) {
+          const fileInput = document.getElementById("file-" + upId);
+          if (!fileInput) return;
+          fileInput.click();
+          return;
         }
       } catch (err) {
-        alert(err.message);
+        toast(err.message, "err");
       }
     });
 
-    load();
+    // handle change event for hidden file inputs
+    list.addEventListener("change", async (e) => {
+      const input = e.target;
+      if (!input?.id?.startsWith("file-")) return;
+
+      const id = input.id.replace("file-", "");
+      const file = input.files?.[0];
+      if (!file) return;
+
+      try {
+        toast("Uploading...", "ok");
+        const path = await uploadFile(file);
+
+        const imgField = document.querySelector(`[data-id="${id}"][data-k="image"]`);
+        if (imgField) imgField.value = path;
+
+        await saveRow(id);
+
+        toast("Image uploaded + saved ✅", "ok");
+        await load();
+      } catch (err) {
+        toast(err.message, "err");
+      } finally {
+        input.value = "";
+      }
+    });
+
+    // ===== ORDERS =====
+    function fmtMoney(n) {
+      const x = Number(n || 0);
+      return "$" + x.toFixed(2);
+    }
+
+    function safeText(s) {
+      return String(s ?? "");
+    }
+
+    function orderHTML(o) {
+      const items = Array.isArray(o.items) ? o.items : [];
+      const itemsHTML = items.length
+        ? items.map(it => {
+            const lineTotal = Number(it.price || 0) * Number(it.qty || 1);
+            return `
+              <div class="order-item">
+                <div>
+                  <div class="name">${esc(it.title || "Item")}</div>
+                  <div class="sub">x${Number(it.qty || 1)}</div>
+                </div>
+                <div class="price">${fmtMoney(lineTotal)}</div>
+              </div>
+            `;
+          }).join("")
+        : `<div class="empty">No items</div>`;
+
+      return `
+        <div class="order-card">
+          <div class="order-top">
+            <div>
+              <div class="order-id">Order #${esc(o.id)}</div>
+              <div class="order-date">${esc(o.created_at || "")}</div>
+
+              <div class="order-meta">
+                <div><b>User:</b> ${esc(o.full_name || "—")}</div>
+                <div><b>Phone:</b> ${esc(o.phone || "—")}</div>
+                <div><b>Address:</b> ${esc(o.address || "—")}</div>
+                ${o.comment ? `<div><b>Comment:</b> ${esc(o.comment)}</div>` : ``}
+              </div>
+            </div>
+
+            <div class="order-total">
+              <span class="label">Total</span>
+              <span class="value">${fmtMoney(o.total)}</span>
+            </div>
+          </div>
+
+          <div class="order-items">
+            ${itemsHTML}
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadOrders() {
+      if (!ordersBox) return;
+      try {
+        const r = await fetch("/api/orders", { credentials: "include" });
+        const data = await r.json();
+
+        if (!Array.isArray(data) || !data.length) {
+          ordersBox.innerHTML = `<div class="empty">No orders yet.</div>`;
+          return;
+        }
+
+        ordersBox.innerHTML = data.map(orderHTML).join("");
+      } catch {
+        ordersBox.innerHTML = `<div class="empty">Cannot load orders.</div>`;
+      }
+    }
+
+    (async () => {
+      await mustBeAdmin();
+      await load();
+      await loadOrders();
+    })();
   </script>
 </body>
 </html>
